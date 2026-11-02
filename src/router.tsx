@@ -1,5 +1,5 @@
-// Tiny, dependency-free client-side router (History API).
-// Swap for react-router-dom later if you prefer — the API is intentionally similar.
+// Tiny, dependency-free client-side router using hash URLs (/#/contact),
+// so page refreshes work on static hosts like GitHub Pages.
 import {
   createContext,
   useCallback,
@@ -20,19 +20,22 @@ const RouterContext = createContext<RouterValue>({ path: '/', navigate: () => {}
 
 const normalize = (p: string) => (p.length > 1 ? p.replace(/\/+$/, '') : p);
 
+const currentPath = () => normalize(window.location.hash.replace(/^#/, '').split('?')[0] || '/');
+
 export function Router({ children }: { children: ReactNode }) {
-  const [path, setPath] = useState(() => normalize(window.location.pathname));
+  const [path, setPath] = useState(currentPath);
 
   useEffect(() => {
-    const onPop = () => setPath(normalize(window.location.pathname));
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    const onHashChange = () => {
+      setPath(currentPath());
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
   const navigate = useCallback((to: string) => {
-    window.history.pushState({}, '', to);
-    setPath(normalize(new URL(to, window.location.origin).pathname));
-    window.scrollTo({ top: 0 });
+    window.location.hash = to;
   }, []);
 
   return <RouterContext.Provider value={{ path, navigate }}>{children}</RouterContext.Provider>;
@@ -55,7 +58,7 @@ export function Link({ to, onClick, children, ...rest }: LinkProps) {
 
   return (
     <a
-      href={to}
+      href={isExternal ? to : `#${to}`}
       onClick={handleClick}
       {...(isExternal && to.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
       {...rest}

@@ -36,6 +36,8 @@ public/images/              ← photos and flags (sources in public/images/CREDI
 
 ## Routes
 
+Routes use hash URLs (e.g. `/#/contact`) so refreshes work on GitHub Pages.
+
 `/`, `/services`, `/freight-hauling`, `/machinery-transportation`, `/lumber-hauling`,
 `/wide-oversize-shipments`, `/specialized-shipments`, `/about`, `/drive-with-us`, `/faq`,
 `/contact`, `/send-a-resume`, `/privacy-policy`.
@@ -48,3 +50,8 @@ To use your own photos, replace the files in `public/images/` keeping the same n
 ## Contact form
 
 The form currently only logs to the console. Connect it to a form service (Formspree, EmailJS, or an API route) in `src/pages/Contact.tsx`.
+
+## Deployment
+
+Pushing to `main` builds and deploys to GitHub Pages via `.github/workflows/deploy.yml`.
+Live site: https://mankotiaharsh.github.io/quicker_logistics/

@@ -10,18 +10,20 @@ export const brand = {
 };
 
 // Photos live in /public/images (sources listed in public/images/CREDITS.md).
+const img = (file: string) => `${import.meta.env.BASE_URL}images/${file}`;
+
 export const images = {
-  hero: '/images/hero.jpg',
-  general: '/images/freight-hauling.jpg',
-  machinery: '/images/machinery.jpg',
-  lumber: '/images/lumber.jpg',
-  wideLoad: '/images/wide-load.jpg',
-  specialized: '/images/specialized.jpg',
-  about: '/images/about.jpg',
-  fleet: '/images/fleet.jpg',
-  driver: '/images/driver.jpg',
-  flagCanada: '/images/flag-canada.svg',
-  flagUsa: '/images/flag-usa.svg',
+  hero: img('hero.jpg'),
+  general: img('freight-hauling.jpg'),
+  machinery: img('machinery.jpg'),
+  lumber: img('lumber.jpg'),
+  wideLoad: img('wide-load.jpg'),
+  specialized: img('specialized.jpg'),
+  about: img('about.jpg'),
+  fleet: img('fleet.jpg'),
+  driver: img('driver.jpg'),
+  flagCanada: img('flag-canada.svg'),
+  flagUsa: img('flag-usa.svg'),
 };
 
 export const contact = {
