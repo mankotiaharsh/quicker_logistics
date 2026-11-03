@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read # to check on GitHub's own branch publish (see the deploy job)
 
 concurrency:
   group: pages
@@ -41,5 +42,23 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      # While Settings → Pages → Source is "Deploy from a branch", GitHub also publishes the raw
+      # repo files ("pages build and deployment") on every push, and whichever deploy finishes
+      # last is what the site serves. Wait for that one to finish so the built site lands last.
+      # Once Source is "GitHub Actions" that run no longer exists and this step ends after ~1 minute.
+      - name: Wait for GitHub's branch publish to finish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 40); do
+            status=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=${{ github.sha }}" \
+              --jq '[.workflow_runs[] | select(.name == "pages build and deployment")][0].status // "none"')
+            echo "Branch publish status: $status"
+            if [ "$status" = "completed" ]; then exit 0; fi
+            if [ "$status" = "none" ] && [ "$i" -ge 6 ]; then echo "No branch publish for this commit."; exit 0; fi
+            sleep 10
+          done
+          echo "Branch publish still running after 400s; deploying anyway."
+
       - id: deployment
         uses: actions/deploy-pages@v5
