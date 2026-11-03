@@ -24,7 +24,27 @@ export const images = {
   driver: img('driver.jpg'),
   flagCanada: img('flag-canada.svg'),
   flagUsa: img('flag-usa.svg'),
+  logo: img('logo.png'),
 };
+
+// Flatbed photos that fade through the home page hero.
+// Each lives in /public/images/hero as <name>-1600.webp (desktop) and <name>-900.webp (mobile).
+// To use your own photos, export them as 1600px and 900px wide WebP files with the same names.
+const heroSlide = (name: string, alt: string) => ({
+  src: img(`hero/${name}-1600.webp`),
+  srcSet: `${img(`hero/${name}-900.webp`)} 900w, ${img(`hero/${name}-1600.webp`)} 1600w`,
+  alt,
+});
+
+export const heroSlides = [
+  heroSlide('slide-1', 'Kenworth flatbed truck on a wet highway'),
+  heroSlide('slide-2', 'Flatbed truck on an open highway'),
+  heroSlide('slide-3', 'Flatbed semi hauling a specialized load'),
+  heroSlide('slide-4', 'Freightliner flatbed truck on the road'),
+];
+
+// Quick facts shown along the bottom of the hero.
+export const heroFacts = [`Since ${brand.founded}`, `${brand.trucks}-Truck Fleet`, 'Canada ⇄ USA Only', 'Wide & Oversize Loads'];
 
 export const contact = {
   person: 'Mandeep Singh',
@@ -70,9 +90,9 @@ export const services: Service[] = [
   {
     slug: 'lumber-hauling',
     title: 'Lumber Hauling',
-    short: 'Lumber and building materials delivered between Canada and the USA.',
+    short: 'Dimensional lumber, panels and timber delivered between Canada and the USA.',
     image: images.lumber,
-    intro: 'Lumber, panels and building materials hauled on flatbed, then tarped and secured so they arrive in good condition.',
+    intro: 'Lumber, panels and timber hauled on flatbed, then tarped and secured so they arrive in good condition.',
     bullets: ['Dimensional lumber & panels', 'Tarping & securement', 'Mill, yard and job-site delivery', 'Steady cross-border lanes'],
   },
   {
@@ -87,9 +107,18 @@ export const services: Service[] = [
     slug: 'specialized-shipments',
     title: 'Specialized Shipments',
     short: 'Freight that needs special equipment, handling or planning.',
-    image: images.specialized,
+    image: images.about,
     intro: 'For freight that doesn\'t fit a standard load, we work with you on equipment, securement and timing to get it across the border safely.',
     bullets: ['Custom load planning', 'Specialized securement', 'Careful handling', 'One point of contact'],
+  },
+  {
+    slug: 'steel-building-materials',
+    title: 'Steel & Building Materials',
+    short: 'Structural steel, pipe, rebar and construction supplies on flatbed.',
+    image: images.specialized,
+    intro:
+      'Beams, plate, pipe, rebar, roofing and other construction materials, chained and tarped on flatbed and delivered to yards and job sites on both sides of the border.',
+    bullets: ['Structural steel, plate & pipe', 'Rebar, roofing & siding', 'Chains, straps & tarps', 'Yard and job-site delivery'],
   },
 ];
 
@@ -110,7 +139,7 @@ export const stats = [
   { value: String(brand.founded), label: 'Established' },
   { value: String(brand.trucks), label: 'Trucks In Our Fleet' },
   { value: 'CAN ⇄ USA', label: 'Cross-Border Lanes' },
-  { value: '5', label: 'Freight Specialties' },
+  { value: String(services.length), label: 'Freight Specialties' },
 ];
 
 export const processSteps = [
@@ -121,7 +150,7 @@ export const processSteps = [
 ];
 
 export const faqs = [
-  { q: `What does ${brand.name} haul?`, a: 'General freight, machinery, lumber, wide/oversize shipments and specialized shipments.' },
+  { q: `What does ${brand.name} haul?`, a: 'General freight, machinery, lumber, steel and building materials, wide/oversize shipments and specialized shipments.' },
   { q: 'Where do you operate?', a: 'We run cross-border only, from Canada to the USA and from the USA back to Canada.' },
   { q: 'Do you haul domestic loads?', a: 'No. We focus only on cross-border freight between Canada and the United States.' },
   { q: 'Can you move wide or oversize loads?', a: 'Yes. We handle over-width and over-dimensional shipments, including the permits and routing they need.' },

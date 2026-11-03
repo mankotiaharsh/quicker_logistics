@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useRouter } from '../router';
-import { brand, contact, nav, type NavItem } from '../data/site';
+import { brand, contact, images, nav, type NavItem } from '../data/site';
 import { Icon } from './Icons';
 import { Flags } from './Sections';
 
@@ -82,9 +82,7 @@ export default function Header() {
       <TopBar />
       <div className="container header__inner">
         <Link to="/" className="header__logo" aria-label={`${brand.name} home`}>
-          <span className="logo-text">
-            Quicker<span>Logistics</span>
-          </span>
+          <img src={images.logo} alt={brand.name} width={720} height={233} />
         </Link>
         <nav className={`nav ${mobileOpen ? 'is-open' : ''}`} aria-label="Main">
           <ul className="nav__list">

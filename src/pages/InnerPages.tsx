@@ -7,7 +7,7 @@ import { Icon } from '../components/Icons';
 export function ServicesPage() {
   return (
     <>
-      <PageHero title="Our Services" subtitle="Freight, machinery, lumber, wide and specialized shipments between Canada and the USA." />
+      <PageHero title="Our Services" subtitle="Freight, machinery, lumber, steel, wide and specialized shipments between Canada and the USA." />
       <ServicesGrid />
       <Process />
       <ContactCta />

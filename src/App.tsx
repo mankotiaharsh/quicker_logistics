@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import { AboutPage, DrivePage, FaqPage, LegalPage, NotFound, ServicesPage } from './pages/InnerPages';
 import { services } from './data/site';
 import { Router, useRouter } from './router';
+import { useScrollReveal } from './components/useScrollReveal';
 
 const staticRoutes: Record<string, () => ReactElement> = {
   '/': () => <Home />,
@@ -31,6 +32,7 @@ function resolve(path: string): ReactElement {
 
 function Routes() {
   const { path } = useRouter();
+  useScrollReveal(path);
   return <main key={path}>{resolve(path)}</main>;
 }
 

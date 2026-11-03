@@ -1,5 +1,5 @@
 import { Link } from '../router';
-import { brand, contact, footerColumns } from '../data/site';
+import { brand, contact, footerColumns, images } from '../data/site';
 import { Icon } from './Icons';
 
 export default function Footer() {
@@ -7,9 +7,7 @@ export default function Footer() {
     <footer className="footer">
       <div className="container footer__top">
         <div className="footer__brand">
-          <span className="logo-text logo-text--light footer__logo-text">
-            Quicker<span>Logistics</span>
-          </span>
+          <img src={images.logo} alt={brand.name} className="footer__logo" width={720} height={233} />
           <h3 className="footer__tagline">
             Canada <span>⇄</span> USA
           </h3>

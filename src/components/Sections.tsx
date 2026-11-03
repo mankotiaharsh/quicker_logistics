@@ -1,8 +1,8 @@
 // Reusable page sections. The Home page composes all of them;
 // inner pages reuse a subset.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { Link } from '../router';
-import { brand, contact, faqs, images, processSteps, services, stats, type Service } from '../data/site';
+import { brand, contact, faqs, heroFacts, heroSlides, images, processSteps, services, stats, type Service } from '../data/site';
 import { Icon } from './Icons';
 
 export function SectionHead({ eyebrow, title, text, center = false, light = false }: {
@@ -43,31 +43,207 @@ export function PageHero({ title, subtitle, image = images.hero }: { title: stri
   );
 }
 
+// How long each hero photo stays on screen (the progress bar under the active dot fills over this time).
+const SLIDE_MS = 6500;
+
 export function Hero() {
+  const count = heroSlides.length;
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev] = useState<number | null>(null);
+  const [paused, setPaused] = useState(false);
+  // Only the first photos are mounted up front; the rest load just before they are shown.
+  const [mounted, setMounted] = useState(Math.min(2, count));
+
+  const goTo = (i: number) => {
+    if (i === current) return;
+    setPrev(current);
+    setCurrent(i);
+    setMounted((m) => Math.max(m, Math.min(i + 2, count)));
+  };
+
+  // Advance on a timer. Time left on the current photo is kept while paused (hover/focus),
+  // so the slideshow resumes where it stopped, in step with the CSS progress bar.
+  // On a slow connection it waits for the next photo to finish loading instead of showing a blank.
+  const remaining = useRef({ slide: current, ms: SLIDE_MS });
+  const loaded = useRef(new Set<number>());
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    if (paused || count < 2) return;
+    if (remaining.current.slide !== current) remaining.current = { slide: current, ms: SLIDE_MS };
+    const started = performance.now();
+    let fired = false;
+    const id = window.setTimeout(() => {
+      fired = true;
+      const next = (current + 1) % count;
+      if (loaded.current.has(next)) {
+        goTo(next);
+      } else {
+        remaining.current.ms = 400;
+        setRetry((r) => r + 1);
+      }
+    }, remaining.current.ms);
+    return () => {
+      window.clearTimeout(id);
+      // Paused or a dot was clicked before the timer fired: remember how much time was left.
+      if (!fired && remaining.current.slide === current) remaining.current.ms -= performance.now() - started;
+    };
+  }, [current, paused, count, retry]);
+
   return (
-    <section className="hero" style={{ backgroundImage: `url("${images.hero}")` }}>
+    <section
+      className={`hero ${paused ? 'is-paused' : ''}`}
+      style={{ '--slide-ms': `${SLIDE_MS}ms` } as CSSProperties}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+    >
+      <div className="hero__slides">
+        {heroSlides.slice(0, mounted).map((slide, i) => (
+          <img
+            key={slide.src}
+            src={slide.src}
+            srcSet={slide.srcSet}
+            sizes="100vw"
+            alt={i === current ? slide.alt : ''}
+            aria-hidden={i !== current}
+            decoding="async"
+            onLoad={() => loaded.current.add(i)}
+            onError={() => loaded.current.add(i)}
+            className={`hero__slide ${i === current ? 'is-active' : ''} ${i === prev ? 'is-prev' : ''}`}
+          />
+        ))}
+      </div>
       <div className="hero__overlay" />
+
       <div className="container hero__inner">
         <span className="hero__badge">
-          <Flags size={16} /> Cross-Border Flatbed Trucking · Since {brand.founded}
+          <Flags size={16} /> Cross-Border Flatbed Trucking
         </span>
         <h1>
           Canada to USA <span>&amp; Back Again</span>
         </h1>
-        <p className="hero__sub">Machinery, lumber, wide and specialized shipments, hauled across the border.</p>
-        <p className="hero__text">
-          {brand.name} runs a {brand.trucks}-truck fleet dedicated to cross-border freight between Canada and the United States.
-        </p>
+        <p className="hero__sub">Machinery, lumber, wide and specialized loads, hauled across the border both ways.</p>
         <div className="hero__actions">
-          <Link to="/contact" className="btn btn--primary btn--lg">
+          <Link to="/contact" className="btn btn--primary btn--lg hero__quote">
             Get a Quote
           </Link>
-          <a href={contact.phoneHref} className="btn btn--outline btn--lg">
-            Call {contact.phoneDisplay}
+          <a href={contact.phoneHref} className="btn btn--outline btn--lg hero__call">
+            <Icon name="phone" size={18} /> Call {contact.phoneDisplay}
           </a>
         </div>
       </div>
+
+      <div className="hero__bar">
+        <div className="container hero__bar-inner">
+          <ul className="hero__facts">
+            {heroFacts.map((f) => (
+              <li key={f}>
+                <Icon name="check" size={16} /> {f}
+              </li>
+            ))}
+          </ul>
+          {count > 1 && (
+            <div className="hero__dots" role="group" aria-label="Hero photos">
+              {heroSlides.map((slide, i) => (
+                <button
+                  key={slide.src}
+                  type="button"
+                  className={`hero__dot ${i === current ? 'is-active' : ''}`}
+                  aria-label={`Show photo ${i + 1} of ${count}: ${slide.alt}`}
+                  aria-current={i === current}
+                  onClick={() => goTo(i)}
+                >
+                  <span className="hero__progress" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </section>
+  );
+}
+
+const COUNT_MS = 1800;
+
+// A stat value that animates when it scrolls into view: plain numbers count up
+// (years count up from 20 years earlier), and "⇄" arrows slide back and forth.
+function StatValue({ value }: { value: string }) {
+  const ref = useRef<HTMLElement>(null);
+  const isNumber = /^\d+$/.test(value);
+  const target = Number(value);
+  const from = isNumber && target >= 1900 ? target - 20 : 0;
+  const [shown, setShown] = useState(() =>
+    isNumber && !window.matchMedia('(prefers-reduced-motion: reduce)').matches ? String(from) : value,
+  );
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const finish = () => {
+      setShown(value);
+      setDone(true);
+    };
+    if (!('IntersectionObserver' in window)) {
+      finish();
+      return;
+    }
+    if (!isNumber || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // Nothing to count (or motion is reduced): show the final value when it comes into view.
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          finish();
+        },
+        { threshold: 0.6 },
+      );
+      observer.observe(el);
+      return () => observer.disconnect();
+    }
+
+    let frame = 0;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        const start = performance.now();
+        const tick = () => {
+          const t = Math.min((performance.now() - start) / COUNT_MS, 1);
+          const eased = 1 - Math.pow(1 - t, 3); // fast start, gentle finish
+          setShown(String(Math.round(from + (target - from) * eased)));
+          if (t < 1) frame = requestAnimationFrame(tick);
+          else finish();
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.6 },
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [value, isNumber, target, from]);
+
+  const parts = shown.split('⇄');
+  return (
+    <strong ref={ref} className={`stat__value ${done ? 'is-done' : ''}`}>
+      <span aria-hidden="true">
+        {parts.length === 2 ? (
+          <>
+            {parts[0]}
+            <span className="stat__arrows">⇄</span>
+            {parts[1]}
+          </>
+        ) : (
+          shown
+        )}
+      </span>
+      <span className="sr-only">{value}</span>
+    </strong>
   );
 }
 
@@ -79,7 +255,7 @@ export function Stats() {
         <div className="stats__grid">
           {stats.map((s) => (
             <div key={s.label} className="stat">
-              <strong>{s.value}</strong>
+              <StatValue value={s.value} />
               <span>{s.label}</span>
             </div>
           ))}
@@ -89,13 +265,14 @@ export function Stats() {
   );
 }
 
+// Kept short so each item fits on one line in the two-column list.
 const shipperChecks = [
   'Canada ⇄ USA lanes',
-  'Experienced cross-border drivers',
-  'Machinery & lumber specialists',
-  'Wide & oversize capable',
-  'Safety-first operations',
-  'Direct line to the owner',
+  'Experienced drivers',
+  'Machinery & lumber',
+  'Wide & oversize loads',
+  'Safety-first fleet',
+  'Direct line to owner',
 ];
 
 export function ShipperSection() {
