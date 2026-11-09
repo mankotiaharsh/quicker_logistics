@@ -1,4 +1,4 @@
-const paths: Record<'phone' | 'mail' | 'pin' | 'check' | 'star' | 'arrow' | 'chevron', string> = {
+const paths: Record<'phone' | 'mail' | 'pin' | 'check' | 'star' | 'arrow' | 'chevron' | 'pause' | 'play', string> = {
   phone:
     'M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z',
   mail: 'M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z',
@@ -7,6 +7,8 @@ const paths: Record<'phone' | 'mail' | 'pin' | 'check' | 'star' | 'arrow' | 'che
   star: 'M12 17.3 18.2 21l-1.6-7L22 9.2l-7.2-.6L12 2 9.2 8.6 2 9.2 7.4 14l-1.6 7z',
   arrow: 'M12 4l-1.4 1.4 5.6 5.6H4v2h12.2l-5.6 5.6L12 20l8-8z',
   chevron: 'M7.4 8.6 12 13.2l4.6-4.6L18 10l-6 6-6-6z',
+  pause: 'M7 5h3.5v14H7zm6.5 0H17v14h-3.5z',
+  play: 'M8 5.5v13l10.5-6.5z',
 };
 
 export function Icon({ name, size = 18 }: { name: keyof typeof paths; size?: number }) {

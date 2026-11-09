@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import CallButton from './components/CallButton';
 import Home from './pages/Home';
 import ServicePage from './pages/ServicePage';
 import Contact from './pages/Contact';
@@ -43,6 +44,7 @@ export default function App() {
       <Header />
       <Routes />
       <Footer />
+      <CallButton />
     </Router>
   );
 }

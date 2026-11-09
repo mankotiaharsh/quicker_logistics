@@ -30,18 +30,31 @@ export const images = {
 // Flatbed photos that fade through the home page hero.
 // Each lives in /public/images/hero as <name>-1600.webp (desktop) and <name>-900.webp (mobile).
 // To use your own photos, export them as 1600px and 900px wide WebP files with the same names.
-const heroSlide = (name: string, alt: string) => ({
+// Each photo also has a caption that links to the matching page, and a focal point:
+// how far across the photo (0–100%) the truck is, so phones crop around the truck, not the empty road.
+const heroSlide = (name: string, alt: string, caption: string, to: string, focusX: number) => ({
   src: img(`hero/${name}-1600.webp`),
   srcSet: `${img(`hero/${name}-900.webp`)} 900w, ${img(`hero/${name}-1600.webp`)} 1600w`,
   alt,
+  caption,
+  to,
+  focus: `${focusX}% 50%`,
 });
 
 export const heroSlides = [
-  heroSlide('slide-1', 'Kenworth flatbed truck on a wet highway'),
-  heroSlide('slide-2', 'Flatbed truck on an open highway'),
-  heroSlide('slide-3', 'Flatbed semi hauling a specialized load'),
-  heroSlide('slide-4', 'Freightliner flatbed truck on the road'),
+  heroSlide('slide-1', 'Kenworth flatbed truck on a wet highway', 'Freight Hauling', '/freight-hauling', 45),
+  heroSlide('slide-2', 'Flatbed truck on an open highway', 'All Flatbed Services', '/services', 62),
+  heroSlide('slide-3', 'Flatbed semi hauling a specialized load', 'Specialized Shipments', '/specialized-shipments', 68),
+  heroSlide('slide-4', 'Freightliner flatbed truck on the road', 'Drive With Us', '/drive-with-us', 38),
 ];
+
+// A 32px blurred copy of the first photo (~260 bytes), shown instantly while the real photo downloads.
+// Regenerate it if you replace slide-1.
+export const heroPlaceholder =
+  'data:image/webp;base64,UklGRrwAAABXRUJQVlA4ILAAAAAQBQCdASogABUAPuFeqU2opSQiMAwBEBwJbACdMoADQH/HVEzcW1Z8OB81U65EPU3gAP7TVC6HBMfm0z9CF4mQLeeZ6shQcFyUwkFGauPn+4KHMQ4p9XMnyLMuYE3ZqMpn6HXXZxPZqImePfrG+moWRae2T1jnc4yxqV0ubV2oFA/btR62Djgc82rbY0v+sZyItJevPKf9+/TpYMtmsX5Jturd8+FLke+KakJF4SAAAA==';
+
+// Words that rotate in the hero subheadline.
+export const heroCargo = ['Machinery', 'Lumber', 'Steel', 'Oversize Loads', 'Specialized Freight'];
 
 // Quick facts shown along the bottom of the hero.
 export const heroFacts = [`Since ${brand.founded}`, `${brand.trucks}-Truck Fleet`, 'Canada ⇄ USA Only', 'Wide & Oversize Loads'];

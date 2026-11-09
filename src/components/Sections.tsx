@@ -1,8 +1,8 @@
 // Reusable page sections. The Home page composes all of them;
 // inner pages reuse a subset.
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type TouchEvent } from 'react';
 import { Link } from '../router';
-import { brand, contact, faqs, heroFacts, heroSlides, images, processSteps, services, stats, type Service } from '../data/site';
+import { brand, contact, faqs, heroCargo, heroFacts, heroPlaceholder, heroSlides, images, processSteps, services, stats, type Service } from '../data/site';
 import { Icon } from './Icons';
 
 export function SectionHead({ eyebrow, title, text, center = false, light = false }: {
@@ -46,10 +46,43 @@ export function PageHero({ title, subtitle, image = images.hero }: { title: stri
 // How long each hero photo stays on screen (the progress bar under the active dot fills over this time).
 const SLIDE_MS = 6500;
 
+const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// "Across the border and back, we haul <word>", where the word cycles through what we carry.
+// Screen readers get one plain sentence; reduced-motion visitors see the plain sentence too.
+function HeroCargo({ paused }: { paused: boolean }) {
+  const [index, setIndex] = useState(0);
+  const [still] = useState(prefersReducedMotion);
+
+  useEffect(() => {
+    if (paused || still) return;
+    const id = window.setInterval(() => setIndex((i) => (i + 1) % heroCargo.length), 2600);
+    return () => window.clearInterval(id);
+  }, [paused, still]);
+
+  if (still) {
+    return <p className="hero__sub">Machinery, lumber, steel, oversize and specialized loads, hauled across the border both ways.</p>;
+  }
+  return (
+    <p className="hero__sub">
+      <span className="sr-only">We haul machinery, lumber, steel, oversize loads and specialized freight across the border, both ways.</span>
+      <span aria-hidden="true">
+        Across the border and back, we haul
+        <span className="hero__cargo">
+          <span key={index} className="hero__cargo-word">
+            {heroCargo[index]}
+          </span>
+        </span>
+      </span>
+    </p>
+  );
+}
+
 export function Hero() {
   const count = heroSlides.length;
   const [current, setCurrent] = useState(0);
   const [prev, setPrev] = useState<number | null>(null);
+  // The slideshow keeps running on hover; it only stops when the visitor presses the pause button.
   const [paused, setPaused] = useState(false);
   // Only the first photos are mounted up front; the rest load just before they are shown.
   const [mounted, setMounted] = useState(Math.min(2, count));
@@ -60,8 +93,47 @@ export function Hero() {
     setCurrent(i);
     setMounted((m) => Math.max(m, Math.min(i + 2, count)));
   };
+  const next = () => goTo((current + 1) % count);
+  const previous = () => goTo((current - 1 + count) % count);
 
-  // Advance on a timer. Time left on the current photo is kept while paused (hover/focus),
+  // Swipe left/right on touch screens to change photo (ignores mostly-vertical scroll gestures).
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    const t = e.touches[0];
+    touchStart.current = { x: t.clientX, y: t.clientY };
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    if (!start || count < 2) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - start.x;
+    const dy = t.clientY - start.y;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) (dx < 0 ? next : previous)();
+  };
+
+  // Parallax: while the hero is on screen, the photos scroll a little slower than the page.
+  const heroRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero || prefersReducedMotion()) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      if (y <= hero.offsetHeight) hero.style.setProperty('--parallax', `${Math.round(y * 0.3)}px`);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  // Advance on a timer. Time left on the current photo is kept while paused,
   // so the slideshow resumes where it stopped, in step with the CSS progress bar.
   // On a slow connection it waits for the next photo to finish loading instead of showing a blank.
   const remaining = useRef({ slide: current, ms: SLIDE_MS });
@@ -91,14 +163,19 @@ export function Hero() {
 
   return (
     <section
+      ref={heroRef}
       className={`hero ${paused ? 'is-paused' : ''}`}
       style={{ '--slide-ms': `${SLIDE_MS}ms` } as CSSProperties}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
     >
       <div className="hero__slides">
+        {/* Tiny blurred copy of the first photo: visible instantly, then covered by the real photo */}
+        <div
+          className="hero__placeholder"
+          aria-hidden="true"
+          style={{ backgroundImage: `url("${heroPlaceholder}")`, backgroundPosition: heroSlides[0].focus }}
+        />
         {heroSlides.slice(0, mounted).map((slide, i) => (
           <img
             key={slide.src}
@@ -108,9 +185,13 @@ export function Hero() {
             alt={i === current ? slide.alt : ''}
             aria-hidden={i !== current}
             decoding="async"
+            loading={i === 0 ? 'eager' : undefined}
+            // The first photo is the largest thing on the page: ask the browser to fetch it before anything else.
+            {...(i === 0 ? { fetchpriority: 'high' } : {})}
             onLoad={() => loaded.current.add(i)}
             onError={() => loaded.current.add(i)}
             className={`hero__slide ${i === current ? 'is-active' : ''} ${i === prev ? 'is-prev' : ''}`}
+            style={{ objectPosition: slide.focus }}
           />
         ))}
       </div>
@@ -118,12 +199,18 @@ export function Hero() {
 
       <div className="container hero__inner">
         <span className="hero__badge">
-          <Flags size={16} /> Cross-Border Flatbed Trucking
+          {/* Canada → road → USA, with lane dashes rolling between the flags */}
+          <span className="hero__route" aria-hidden="true">
+            <img src={images.flagCanada} alt="" />
+            <span className="hero__road" />
+            <img src={images.flagUsa} alt="" />
+          </span>
+          Cross-Border Flatbed Trucking
         </span>
         <h1>
           Canada to USA <span>&amp; Back Again</span>
         </h1>
-        <p className="hero__sub">Machinery, lumber, wide and specialized loads, hauled across the border both ways.</p>
+        <HeroCargo paused={paused} />
         <div className="hero__actions">
           <Link to="/contact" className="btn btn--primary btn--lg hero__quote">
             Get a Quote
@@ -136,6 +223,10 @@ export function Hero() {
 
       <div className="hero__bar">
         <div className="container hero__bar-inner">
+          {/* What the current photo shows, linking to that page */}
+          <Link key={current} to={heroSlides[current].to} className="hero__caption">
+            {heroSlides[current].caption} <Icon name="arrow" size={14} />
+          </Link>
           <ul className="hero__facts">
             {heroFacts.map((f) => (
               <li key={f}>
@@ -144,7 +235,15 @@ export function Hero() {
             ))}
           </ul>
           {count > 1 && (
-            <div className="hero__dots" role="group" aria-label="Hero photos">
+            <div
+              className="hero__dots"
+              role="group"
+              aria-label="Hero photos (use the left and right arrow keys to change photo)"
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight') next();
+                else if (e.key === 'ArrowLeft') previous();
+              }}
+            >
               {heroSlides.map((slide, i) => (
                 <button
                   key={slide.src}
@@ -157,6 +256,15 @@ export function Hero() {
                   <span className="hero__progress" />
                 </button>
               ))}
+              <button
+                type="button"
+                className="hero__pause"
+                aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}
+                aria-pressed={paused}
+                onClick={() => setPaused((p) => !p)}
+              >
+                <Icon name={paused ? 'play' : 'pause'} size={14} />
+              </button>
             </div>
           )}
         </div>
