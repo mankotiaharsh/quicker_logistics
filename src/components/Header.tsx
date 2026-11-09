@@ -12,6 +12,9 @@ function TopBar() {
           <a href={contact.phoneHref}>
             <Icon name="phone" size={14} /> {contact.person}: {contact.phoneDisplay}
           </a>
+          <a href={contact.mapsUrl} target="_blank" rel="noopener noreferrer" className="topbar__address">
+            <Icon name="pin" size={14} /> {contact.address.city}, {contact.address.provinceCode}
+          </a>
         </div>
         <div className="topbar__social">
           <Flags size={14} /> Cross-Border Trucking
@@ -82,7 +85,7 @@ export default function Header() {
       <TopBar />
       <div className="container header__inner">
         <Link to="/" className="header__logo" aria-label={`${brand.name} home`}>
-          <img src={images.logo} alt={brand.name} width={720} height={233} />
+          <img src={images.logo} alt={brand.name} width={720} height={133} />
         </Link>
         <nav className={`nav ${mobileOpen ? 'is-open' : ''}`} aria-label="Main">
           <ul className="nav__list">

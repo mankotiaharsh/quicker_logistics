@@ -45,11 +45,34 @@ export default function Contact({ title = 'Contact Us', intro, topic }: { title?
               <li>
                 <Icon name="pin" size={22} />
                 <div>
+                  <strong>Office</strong>
+                  <address className="contact__address">
+                    {contact.address.streetLine}
+                    <br />
+                    {contact.address.cityLine}
+                    <br />
+                    {contact.address.province}, {contact.address.country}
+                  </address>
+                  <a href={contact.mapsUrl} target="_blank" rel="noopener noreferrer" className="link-arrow">
+                    Get directions <Icon name="arrow" size={16} />
+                  </a>
+                </div>
+              </li>
+              <li>
+                <Icon name="check" size={22} />
+                <div>
                   <strong>Service Area</strong>
                   <span>Cross-border only: Canada to USA and back</span>
                 </div>
               </li>
             </ul>
+            <iframe
+              title={`Map of the ${contact.address.city} office`}
+              className="contact__map"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              src={contact.mapEmbedUrl}
+            />
           </div>
           <form className="form" onSubmit={onSubmit}>
             {sent && <div className="form__success">Thanks! Your message has been sent. We'll be in touch shortly.</div>}

@@ -25,7 +25,7 @@ export function AboutPage() {
             <SectionHead
               eyebrow="Who We Are"
               title="A Cross-Border Carrier You Can Reach Directly"
-              text={`${brand.name} was established in ${brand.founded}. We run a fleet of ${brand.trucks} trucks dedicated to hauling freight from Canada to the USA and back.`}
+              text={`${brand.name} was established in ${brand.founded} and is based in ${contact.address.city}, ${contact.address.province}. We run a fleet of ${brand.trucks} trucks dedicated to hauling freight from Canada to the USA and back.`}
             />
             <p className="lead">
               We specialize in machinery, lumber, wide/oversize and specialized shipments. Because we're a smaller fleet, you deal directly with{' '}
@@ -84,19 +84,6 @@ export function FaqPage() {
       <PageHero title="FAQ" subtitle="Answers to the questions we hear most." />
       <Faq />
       <ContactCta />
-    </>
-  );
-}
-
-export function LegalPage({ title }: { title: string }) {
-  return (
-    <>
-      <PageHero title={title} />
-      <section className="section">
-        <div className="container container--narrow prose">
-          <p>Replace this placeholder with your {title.toLowerCase()} content.</p>
-        </div>
-      </section>
     </>
   );
 }

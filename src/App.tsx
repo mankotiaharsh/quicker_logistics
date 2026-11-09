@@ -4,7 +4,8 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import ServicePage from './pages/ServicePage';
 import Contact from './pages/Contact';
-import { AboutPage, DrivePage, FaqPage, LegalPage, NotFound, ServicesPage } from './pages/InnerPages';
+import { AboutPage, DrivePage, FaqPage, NotFound, ServicesPage } from './pages/InnerPages';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import { services } from './data/site';
 import { Router, useRouter } from './router';
 import { useScrollReveal } from './components/useScrollReveal';
@@ -19,7 +20,7 @@ const staticRoutes: Record<string, () => ReactElement> = {
   '/send-a-resume': () => (
     <Contact title="Send a Resume" intro="Tell us about your driving experience and we'll be in touch." topic="Driving Opportunities" />
   ),
-  '/privacy-policy': () => <LegalPage title="Privacy Policy" />,
+  '/privacy-policy': () => <PrivacyPolicy />,
 };
 
 function resolve(path: string): ReactElement {

@@ -319,7 +319,7 @@ export function HistoryBand() {
           center
           eyebrow="Our Story"
           title={`Moving Freight Across the Border Since ${brand.founded}`}
-          text={`${brand.name} was founded in ${brand.founded} to give shippers a reliable cross-border carrier. Today our ${brand.trucks}-truck fleet runs between Canada and the USA every week.`}
+          text={`${brand.name} was founded in ${contact.address.city}, ${contact.address.province} in ${brand.founded} to give shippers a reliable cross-border carrier. Today our ${brand.trucks}-truck fleet runs between Canada and the USA every week.`}
         />
       </div>
     </section>

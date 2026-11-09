@@ -46,11 +46,30 @@ export const heroSlides = [
 // Quick facts shown along the bottom of the hero.
 export const heroFacts = [`Since ${brand.founded}`, `${brand.trucks}-Truck Fleet`, 'Canada ⇄ USA Only', 'Wide & Oversize Loads'];
 
+const address = {
+  street: '514 Cory Cres S',
+  unit: 'Office No. 3',
+  city: 'Saskatoon',
+  province: 'Saskatchewan',
+  provinceCode: 'SK',
+  postalCode: 'S7K 3J7',
+  country: 'Canada',
+};
+const streetLine = `${address.street}, ${address.unit}`;
+const cityLine = `${address.city}, ${address.provinceCode} ${address.postalCode}`;
+const addressFull = `${streetLine}, ${cityLine}, ${address.country}`;
+// Map look-ups work best without the office number.
+const mapsQuery = encodeURIComponent(`${address.street}, ${cityLine}, ${address.country}`);
+
 export const contact = {
   person: 'Mandeep Singh',
-  phone: '306-514-1390',
-  phoneDisplay: '(306) 514-1390',
+  phone: '+1 306-514-1390',
+  phoneDisplay: '+1 306-514-1390',
   phoneHref: 'tel:+13065141390',
+  address: { ...address, streetLine, cityLine },
+  addressFull,
+  mapsUrl: `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`,
+  mapEmbedUrl: `https://maps.google.com/maps?q=${mapsQuery}&z=15&output=embed`,
 };
 
 export interface NavItem {
@@ -152,6 +171,7 @@ export const processSteps = [
 export const faqs = [
   { q: `What does ${brand.name} haul?`, a: 'General freight, machinery, lumber, steel and building materials, wide/oversize shipments and specialized shipments.' },
   { q: 'Where do you operate?', a: 'We run cross-border only, from Canada to the USA and from the USA back to Canada.' },
+  { q: 'Where is your office?', a: `Our office is at ${addressFull}.` },
   { q: 'Do you haul domestic loads?', a: 'No. We focus only on cross-border freight between Canada and the United States.' },
   { q: 'Can you move wide or oversize loads?', a: 'Yes. We handle over-width and over-dimensional shipments, including the permits and routing they need.' },
   { q: 'How long have you been in business?', a: `${brand.name} has been hauling freight since ${brand.founded}.` },
@@ -171,10 +191,10 @@ export const footerColumns: { title: string; links: NavItem[] }[] = [
       { label: 'Drive With Us', to: '/drive-with-us' },
       { label: 'FAQ', to: '/faq' },
       { label: 'Contact', to: '/contact' },
+      { label: 'Send a Resume', to: '/send-a-resume' },
     ],
   },
-  {
-    title: 'Legal',
-    links: [{ label: 'Privacy Policy', to: '/privacy-policy' }],
-  },
 ];
+
+// Shown in the footer's bottom strip, next to the copyright.
+export const legalLinks: NavItem[] = [{ label: 'Privacy Policy', to: '/privacy-policy' }];
